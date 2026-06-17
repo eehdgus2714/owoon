@@ -41,7 +41,7 @@ def call_claude(prompt: str) -> str:
     resp = requests.post(
         "https://api.anthropic.com/v1/messages",
         headers={
-            "x-api-key": ANTHROPIC_API_KEY,
+            "x-api-key": ANTHROPIC_API_KEY.strip(),
             "anthropic-version": "2023-06-01",
             "content-type": "application/json",
         },
@@ -52,6 +52,9 @@ def call_claude(prompt: str) -> str:
         },
         timeout=30,
     )
+    if resp.status_code >= 400:
+        print("API 에러 응답 본문:", resp.text)
+        print("요청에 사용된 키 길이:", len(ANTHROPIC_API_KEY.strip()))
     resp.raise_for_status()
     data = resp.json()
     return "".join(block["text"] for block in data["content"] if block["type"] == "text")
